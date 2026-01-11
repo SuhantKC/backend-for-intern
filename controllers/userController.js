@@ -1,4 +1,10 @@
+import { z } from 'zod';
 import prisma from '../db.js';
+
+const UserUpdateSchema = z.object({
+    username: z.string().min(3, 'Username must be at least 3 characters').optional(),
+    email: z.string().email('Invalid email address').optional(),
+});
 
 export const getUsers = async (req, res, next) => {
     try {
@@ -46,10 +52,10 @@ export const getUsers = async (req, res, next) => {
 
 export const updateMe = async (req, res, next) => {
     try {
-        const { username, email } = req.body;
+        const validatedData = UserUpdateSchema.parse(req.body);
         const updatedUser = await prisma.user.update({
             where: { id: req.user.id },
-            data: { username, email },
+            data: validatedData,
             select: {
                 id: true,
                 email: true,

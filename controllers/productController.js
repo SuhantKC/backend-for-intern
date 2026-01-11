@@ -1,4 +1,13 @@
+import { z } from 'zod';
 import prisma from '../db.js';
+
+const ProductSchema = z.object({
+    name: z.string().min(1, 'Name is required'),
+    price: z.number({ invalid_type_error: 'Price must be a number' }).positive('Price must be positive'),
+    category: z.string().min(1, 'Category is required'),
+    stock: z.number({ invalid_type_error: 'Stock must be a number' }).int().min(0, 'Stock cannot be negative'),
+    description: z.string().min(1, 'Description is required'),
+});
 
 export const getProducts = async (req, res, next) => {
     try {
@@ -55,14 +64,10 @@ export const getProductById = async (req, res, next) => {
 
 export const createProduct = async (req, res, next) => {
     try {
-        const { name, price, category, stock, description } = req.body;
-
-        if (!name || price === undefined || !category || stock === undefined || !description) {
-            return res.status(400).json({ success: false, message: 'Missing product fields' });
-        }
+        const validatedData = ProductSchema.parse(req.body);
 
         const product = await prisma.product.create({
-            data: { name, price, category, stock, description },
+            data: validatedData,
         });
 
         res.status(201).json({ success: true, data: product });
@@ -74,7 +79,7 @@ export const createProduct = async (req, res, next) => {
 export const updateProduct = async (req, res, next) => {
     try {
         const id = parseInt(req.params.id);
-        const { name, price, category, stock, description } = req.body;
+        const validatedData = ProductSchema.partial().parse(req.body);
 
         const existing = await prisma.product.findUnique({ where: { id } });
         if (!existing) {
@@ -83,7 +88,7 @@ export const updateProduct = async (req, res, next) => {
 
         const product = await prisma.product.update({
             where: { id },
-            data: { name, price, category, stock, description },
+            data: validatedData,
         });
 
         res.status(200).json({ success: true, data: product });
