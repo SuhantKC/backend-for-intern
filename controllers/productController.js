@@ -2,8 +2,39 @@ import prisma from '../db.js';
 
 export const getProducts = async (req, res, next) => {
     try {
-        const products = await prisma.product.findMany();
-        res.status(200).json({ success: true, data: products });
+        const { search, page = 1, limit = 10 } = req.query;
+        const skip = (page - 1) * limit;
+        const take = parseInt(limit);
+
+        const where = search
+            ? {
+                OR: [
+                    { name: { contains: search } },
+                    { description: { contains: search } },
+                    { category: { contains: search } },
+                ],
+            }
+            : {};
+
+        const [products, total] = await Promise.all([
+            prisma.product.findMany({
+                where,
+                skip,
+                take,
+            }),
+            prisma.product.count({ where }),
+        ]);
+
+        res.status(200).json({
+            success: true,
+            data: products,
+            pagination: {
+                total,
+                page: parseInt(page),
+                limit: take,
+                totalPages: Math.ceil(total / take),
+            },
+        });
     } catch (error) {
         next(error);
     }

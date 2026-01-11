@@ -2,14 +2,43 @@ import prisma from '../db.js';
 
 export const getUsers = async (req, res, next) => {
     try {
-        const users = await prisma.user.findMany({
-            select: {
-                id: true,
-                email: true,
-                username: true,
+        const { search, page = 1, limit = 10 } = req.query;
+        const skip = (page - 1) * limit;
+        const take = parseInt(limit);
+
+        const where = search
+            ? {
+                OR: [
+                    { username: { contains: search } },
+                    { email: { contains: search } },
+                ],
+            }
+            : {};
+
+        const [users, total] = await Promise.all([
+            prisma.user.findMany({
+                where,
+                skip,
+                take,
+                select: {
+                    id: true,
+                    email: true,
+                    username: true,
+                },
+            }),
+            prisma.user.count({ where }),
+        ]);
+
+        res.status(200).json({
+            success: true,
+            data: users,
+            pagination: {
+                total,
+                page: parseInt(page),
+                limit: take,
+                totalPages: Math.ceil(total / take),
             },
         });
-        res.status(200).json({ success: true, data: users });
     } catch (error) {
         next(error);
     }
