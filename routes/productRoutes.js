@@ -29,7 +29,6 @@ const router = express.Router();
  *     responses:
  *       201:
  *         description: Product created
- * /products:
  *   get:
  *     summary: List all products (Public)
  *     tags: [Products]
