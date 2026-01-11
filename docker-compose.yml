@@ -1,0 +1,10 @@
+services:
+  api:
+    build: .
+    ports:
+      - "1738:3000"
+    environment:
+      - DATABASE_URL=file:./dev.db
+    volumes:
+      - ./prisma:/app/prisma
+    restart: always
