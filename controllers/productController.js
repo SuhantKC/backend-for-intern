@@ -2,11 +2,17 @@ import { z } from 'zod';
 import prisma from '../db.js';
 
 const ProductSchema = z.object({
-    name: z.string().min(1, 'Name is required'),
-    price: z.number({ invalid_type_error: 'Price must be a number' }).positive('Price must be positive'),
-    category: z.string().min(1, 'Category is required'),
-    stock: z.number({ invalid_type_error: 'Stock must be a number' }).int().min(0, 'Stock cannot be negative'),
-    description: z.string().min(1, 'Description is required'),
+    name: z.string({ required_error: 'Name is required' }).min(1, { message: 'Name is required' }),
+    price: z.number({
+        required_error: 'Price must be a number',
+        invalid_type_error: 'Price must be a number'
+    }).positive({ message: 'Price must be positive' }),
+    category: z.string({ required_error: 'Category is required' }).min(1, { message: 'Category is required' }),
+    stock: z.number({
+        required_error: 'Stock must be a number',
+        invalid_type_error: 'Stock must be a number'
+    }).int().min(0, { message: 'Stock cannot be negative' }),
+    description: z.string({ required_error: 'Description is required' }).min(1, { message: 'Description is required' }),
 });
 
 export const getProducts = async (req, res, next) => {

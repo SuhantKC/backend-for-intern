@@ -4,9 +4,9 @@ import jwt from 'jsonwebtoken';
 import prisma from '../db.js';
 
 const RegisterSchema = z.object({
-    email: z.string().email('Invalid email address'),
-    username: z.string().min(3, 'Username must be at least 3 characters'),
-    password: z.string().min(6, 'Password must be at least 6 characters'),
+    email: z.string({ required_error: 'Invalid email address' }).email('Invalid email address'),
+    username: z.string({ required_error: 'Username must be at least 3 characters' }).min(3, 'Username must be at least 3 characters'),
+    password: z.string({ required_error: 'Password must be at least 6 characters' }).min(6, 'Password must be at least 6 characters'),
 });
 
 export const register = async (req, res, next) => {
@@ -37,8 +37,14 @@ export const register = async (req, res, next) => {
 };
 
 const LoginSchema = z.object({
-    username: z.string().min(1, 'Username is required'),
-    password: z.string().min(1, 'Password is required'),
+    username: z.string({
+        required_error: 'Username is required',
+        invalid_type_error: 'Username is required'
+    }).min(1, 'Username is required'),
+    password: z.string({
+        required_error: 'Password is required',
+        invalid_type_error: 'Password is required'
+    }).min(1, 'Password is required'),
 });
 
 export const login = async (req, res, next) => {
