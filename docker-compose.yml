@@ -5,6 +5,7 @@ services:
       - "1738:3000"
     environment:
       - DATABASE_URL=file:./dev.db
+      - JWT_SECRET=myhardcodedsecret
     volumes:
       - ./prisma:/app/prisma
     restart: always

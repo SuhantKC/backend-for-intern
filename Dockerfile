@@ -7,7 +7,10 @@ WORKDIR /app
 # Copy package.json and package-lock.json first to leverage Docker cache
 COPY package*.json ./
 
-# Install dependencies
+# Install dependencies including openssl and libc6-compat for Prisma
+RUN apk add --no-cache openssl libc6-compat
+
+# Install npm dependencies
 RUN npm install
 
 # Copy the prisma folder
